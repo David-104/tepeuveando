@@ -2,48 +2,41 @@
 
 #include "Game.h"
 
-#include "Bullets.h"
-#include "Fighter.h"
-#include "Networking.h"
 #include "../sdlutils/InputHandler.h"
-#include "../sdlutils/SDLNetUtils.h"
 #include "../sdlutils/SDLUtils.h"
-#include "../utils/Collisions.h"
+#include "LittleWolf.h"
+
 
 Game::Game() :
-		bm_(nullptr), //
-		fighters_(nullptr), //
-		net_(nullptr) {
+		little_wolf_(nullptr) //
+{
 }
 
 Game::~Game() {
-	delete fighters_;
-	delete bm_;
+	delete little_wolf_;
 }
 
-bool Game::init(char *host, Uint16 port) {
-
-	net_ = new Networking();
-
-	if (!net_->init(host, port)) {
-		SDLNetUtils::print_SDLNet_error();
-	}
-	std::cout << "Connected as client " << (int) net_->client_id() << std::endl;
+void Game::init() {
 
 	// initialize the SDLUtils singleton
-	SDLUtils::init("SDLNet Game", 900, 480,
-			"resources/config/asteroid.resources.json");
+	SDLUtils::init("Demo", 900, 480,
+			"resources/config/littlewolf.resources.json");
 
-	bm_ = new Bullets();
-	fighters_ = new Fighter();
+	little_wolf_ = new LittleWolf(sdlutils().width(), sdlutils().height(),
+			sdlutils().window(), sdlutils().renderer());
+
+	// load a map
+	little_wolf_->load("resources/maps/little_wolf/map_0.txt");
 
 	// add some players
-	fighters_->addPlayer(net_->client_id());
-
-	return true;
+	little_wolf_->addPlayer(0);
+	little_wolf_->addPlayer(1);
+	little_wolf_->addPlayer(2);
+	little_wolf_->addPlayer(3);
 }
 
 void Game::start() {
+
 	// a boolean to exit the loop
 	bool exit = false;
 
@@ -62,25 +55,27 @@ void Game::start() {
 				continue;
 			}
 
-			// ESC exists the game
+			// N switches to the next player view
+			if (ihdlr.isKeyDown(SDL_SCANCODE_N)) {
+				little_wolf_->switchToNextPlayer();
+			}
+
+			// R brings deads to life
 			if (ihdlr.isKeyDown(SDL_SCANCODE_R)) {
-				net_->send_restart();
+				little_wolf_->bringAllToLife();
 			}
 
 		}
 
-		fighters_->update();
-		bm_->update();
-		net_->update();
+		little_wolf_->update();
 
-		check_collisions();
+		// the clear is not necessary since we copy the whole texture -- I guess ...
+		// sdlutils().clearRenderer();
 
-		sdlutils().clearRenderer();
-
-		fighters_->render();
-		bm_->render();
+		little_wolf_->render();
 
 		sdlutils().presentRenderer();
+
 
 		Uint32 frameTime = sdlutils().currRealTime() - startTime;
 
@@ -88,26 +83,5 @@ void Game::start() {
 			SDL_Delay(10 - frameTime);
 	}
 
-	net_->disconnect();
-
 }
 
-void Game::check_collisions() {
-	if (!net_->is_master())
-		return;
-
-	for (Bullets::Bullet &b : *bm_) {
-		if (b.used) {
-			for (Fighter::Player &p : *fighters_) {
-				if (p.state == Fighter::ALIVE) {
-					if (Collisions::collidesWithRotation(p.pos, p.width,
-							p.height, p.rot, b.pos, b.width, b.height, b.rot)) {
-
-						net_->send_dead(p.id);
-						continue;
-					}
-				}
-			}
-		}
-	}
-}
