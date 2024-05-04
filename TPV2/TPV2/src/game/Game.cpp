@@ -5,15 +5,16 @@
 #include "../sdlutils/InputHandler.h"
 #include "../sdlutils/SDLUtils.h"
 #include "LittleWolf.h"
-
+#include "Networking.h"
 
 Game::Game() :
-		little_wolf_(nullptr) //
+		little_wolf_(nullptr), net_(nullptr) //
 {
 }
 
 Game::~Game() {
 	delete little_wolf_;
+	delete net_;
 }
 
 bool Game::init(char* host, Uint16 port) {
@@ -37,6 +38,7 @@ bool Game::init(char* host, Uint16 port) {
 
 	// add some players
 	little_wolf_->addPlayer(net_->client_id());
+
 
 	return true;
 }
@@ -74,7 +76,7 @@ void Game::start() {
 		}
 
 		little_wolf_->update();
-		net_->update();
+	    net_->update();
 
 		// the clear is not necessary since we copy the whole texture -- I guess ...
 		// sdlutils().clearRenderer();
@@ -90,5 +92,6 @@ void Game::start() {
 			SDL_Delay(10 - frameTime);
 	}
 
+	net_->disconnect();
 }
 
