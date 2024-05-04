@@ -146,7 +146,6 @@ void LittleWolf::update_player_info(Uint8 id, float ax, float ay, float bx, floa
 	players_[id].state = static_cast<PlayerState>(state);
 	map_.walling[(int)players_[id].where.y][(int)players_[id].where.x] = player_to_tile(id);
 
-	std::cout << (players_[id].state == LittleWolf::ALIVE) << std::endl;
 }
 
 void LittleWolf::load(std::string filename) {
@@ -405,7 +404,6 @@ void LittleWolf::render_upper_view() {
 
 	// add labels to each player, with corresponding rotation
 	for (int i = 0u; i < max_player; i++) {
-		std::cout << "p" << i << std::endl;
 		Player &p = players_[i];
 		if (p.state != NOT_USED) {
 			Texture info(sdlutils().renderer(), "P" + std::to_string(i),
