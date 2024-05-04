@@ -10,6 +10,7 @@
 #include "Game.h"
 #include "../sdlutils/SDLUtils.h"
 #include "../sdlutils/Texture.h"
+#include "Networking.h"
 
 LittleWolf::LittleWolf(uint16_t xres, uint16_t yres, SDL_Window *window,
 		SDL_Renderer *render) :
