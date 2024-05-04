@@ -4,7 +4,9 @@
 #include <SDL_net.h>
 #include <SDL_stdinc.h>
 
+#include "LittleWolf.h"
 #include "netwrok_messages.h"
+
 class Vector2D;
 
 class Networking {
@@ -24,9 +26,8 @@ public:
 		return clientId_ == masterId_;
 	}
 
-	void send_state(const Vector2D &pos, float w, float h, float rot);
-	void send_my_info(const Vector2D &pos, float w, float h, float rot,
-			Uint8 state);
+	void send_state(LittleWolf::Line& fov, LittleWolf::Point& where, float theta);
+	void send_my_info(LittleWolf::Line& fov, LittleWolf::Point& where, float theta, LittleWolf::PlayerState state);
 	
 	void send_shoot(Vector2D p, Vector2D v, int width, int height, float r);
 	void send_dead(Uint8 id);

@@ -132,6 +132,25 @@ public:
 	// update the world, tec
 	void update();
 
+
+
+	// add a new player with identifier <id>
+	bool initPlayer(std::uint8_t id);
+
+	// remove player with identifier <id>
+	void removePlayer(std::uint8_t id);
+
+	// remove player with identifier <id>
+	void killPlayer(std::uint8_t id);
+
+
+	void send_my_info();
+
+	void update_player_state(Uint8 id, float ax, float ay, float bx, float by, float whx, float why, float theta);
+
+	void update_player_info(Uint8 id, float ax , float ay , float bx, float by, float whx, float why, float theta, Uint8 state);
+
+
 private:
 
 	// Calculates wall size using the <corrected> ray to the wall.

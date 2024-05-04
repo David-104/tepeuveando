@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string>
 
+#include "Game.h"
 #include "../sdlutils/SDLUtils.h"
 #include "../sdlutils/Texture.h"
 
@@ -43,6 +44,94 @@ void LittleWolf::update() {
 	spin(p);  // handle spinning
 	move(p);  // handle moving
 	shoot(p); // handle shooting
+
+	
+}
+
+bool LittleWolf::initPlayer(std::uint8_t id)
+{
+	assert(id < max_player);
+
+	if (players_[id].state != NOT_USED)
+		return false;
+
+	auto& rand = sdlutils().rand();
+
+	// The search for an empty cell start at a random position (orow,ocol)
+	uint16_t orow = rand.nextInt(0, map_.walling_height);
+	uint16_t ocol = rand.nextInt(0, map_.walling_width);
+
+	// search for an empty cell
+	uint16_t row = orow;
+	uint16_t col = (ocol + 1) % map_.walling_width;
+	while (!((orow == row) && (ocol == col)) && map_.walling[row][col] != 0) {
+		col = (col + 1) % map_.user_walling_width;
+		if (col == 0)
+			row = (row + 1) % map_.walling_height;
+	}
+
+	// handle the case where the search is failed, which in principle should never
+	// happen unless we start with map with few empty cells
+	if (row >= map_.walling_height)
+		return false;
+
+	// initialize the player
+	Player p = { //
+			id, //
+					viewport(0.8f),             // focal
+					{ col + 0.5f, row + 0.5f }, // Where.
+					{ 0.0f, 0.0f }, 			// Velocity.
+					2.0f, 			            // Speed.
+					0.9f,		            	// Acceleration.
+					0.0f, 			            // Rotation angle in radians.
+					ALIVE                       // Player state
+	};
+
+	// not that player <id> is stored in the map as player_to_tile(id) -- which is id+10
+	map_.walling[(int)p.where.y][(int)p.where.x] = player_to_tile(id);
+	players_[id] = p;
+
+	return true;
+}
+
+void LittleWolf::removePlayer(std::uint8_t id)
+{
+	players_[id].state = LittleWolf::NOT_USED;
+}
+
+void LittleWolf::killPlayer(std::uint8_t id)
+{
+	players_[id].state = LittleWolf::DEAD;
+}
+
+void LittleWolf::send_my_info()
+{
+	Player& p = players_[player_id_];
+
+	Game::instance()->get_networking().send_my_info(p.fov, p.where, p.theta, p.state);
+}
+
+void LittleWolf::update_player_state(Uint8 id, float ax, float ay, float bx, float by, float whx, float why, float theta)
+{
+	players_[id].fov.a.x = ax;
+	players_[id].fov.a.y = ay;
+	players_[id].fov.b.x = bx;
+	players_[id].fov.b.y = by;
+	players_[id].where.x = whx;
+	players_[id].where.y = why;
+	players_[id].theta = theta;
+}
+
+void LittleWolf::update_player_info(Uint8 id, float ax, float ay, float bx, float by, float whx, float why, float theta, Uint8 state)
+{
+	players_[id].fov.a.x = ax;
+	players_[id].fov.a.y = ay;
+	players_[id].fov.b.x = bx;
+	players_[id].fov.b.y = by;
+	players_[id].where.x = whx;
+	players_[id].where.y = why;
+	players_[id].theta = theta;
+	players_[id].state = static_cast<PlayerState>(state);
 }
 
 void LittleWolf::load(std::string filename) {
@@ -135,49 +224,9 @@ void LittleWolf::load(std::string filename) {
 }
 
 bool LittleWolf::addPlayer(std::uint8_t id) {
-	assert(id < max_player);
-
-	if (players_[id].state != NOT_USED)
-		return false;
-
-	auto &rand = sdlutils().rand();
-
-	// The search for an empty cell start at a random position (orow,ocol)
-	uint16_t orow = rand.nextInt(0, map_.walling_height);
-	uint16_t ocol = rand.nextInt(0, map_.walling_width);
-
-	// search for an empty cell
-	uint16_t row = orow;
-	uint16_t col = (ocol + 1) % map_.walling_width;
-	while (!((orow == row) && (ocol == col)) && map_.walling[row][col] != 0) {
-		col = (col + 1) % map_.user_walling_width;
-		if (col == 0)
-			row = (row + 1) % map_.walling_height;
-	}
-
-	// handle the case where the search is failed, which in principle should never
-	// happen unless we start with map with few empty cells
-	if (row >= map_.walling_height)
-		return false;
-
-	// initialize the player
-	Player p = { //
-			id, //
-					viewport(0.8f),             // focal
-					{ col + 0.5f, row + 0.5f }, // Where.
-					{ 0.0f, 0.0f }, 			// Velocity.
-					2.0f, 			            // Speed.
-					0.9f,		            	// Acceleration.
-					0.0f, 			            // Rotation angle in radians.
-					ALIVE                       // Player state
-			};
-
-	// not that player <id> is stored in the map as player_to_tile(id) -- which is id+10
-	map_.walling[(int) p.where.y][(int) p.where.x] = player_to_tile(id);
-	players_[id] = p;
-
+	initPlayer(id);
 	player_id_ = id;
-
+	send_my_info();
 	return true;
 }
 

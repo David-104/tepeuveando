@@ -39,26 +39,32 @@ struct MsgWithMasterId: MsgWithId {
 
 struct PlayerStateMsg: MsgWithId {
 
-	float x;
-	float y;
-	int w;
-	int h;
-	float rot;
+	uint8_t id;     // the id
+	float ax;       //point a x 
+	float ay;       //point a y
+	float bx;       // point b x
+	float by;       //point b y
+	float whx;		//pos x
+	float why;		//pos y
+	float theta;   // rotation (in rad)
 
-	_IMPL_SERIALIAZION_WITH_BASE_(MsgWithId, x,y,w,h,rot)
+	_IMPL_SERIALIAZION_WITH_BASE_(MsgWithId, ax, ay, bx, by, whx, why)
 
 };
 
 struct PlayerInfoMsg: MsgWithId {
 
-	float x;
-	float y;
-	int w;
-	int h;
-	float rot;
-	Uint8 state;
+	uint8_t id;     // the id
+	float ax;       //point a x 
+	float ay;       //point a y
+	float bx;       // point b x
+	float by;       //point b y
+	float whx;		//pos x
+	float why;		//pos y
+	float theta;   // rotation (in rad)
+	Uint8 state;   // the state
 
-	_IMPL_SERIALIAZION_WITH_BASE_(MsgWithId, x,y,w,h,rot,state)
+	_IMPL_SERIALIAZION_WITH_BASE_(MsgWithId, ax, ay , bx, by, whx, why, state)
 
 };
 struct ShootMsg: MsgWithId {
