@@ -1,18 +1,19 @@
 // This file is part of the course TPV2@UCM - Samir Genaim
 
 #pragma once
-
+#include "Networking.h"
+#include "../utils/Singleton.h"
 
 class LittleWolf;
 
-class Game {
+class Game : public Singleton<Game> {
 public:
 	Game();
 	virtual ~Game();
-	void init();
+	bool init(char* host, Uint16 port);
 	void start();
 private:
 	LittleWolf *little_wolf_;
-
+	Networking* net_;
 };
 

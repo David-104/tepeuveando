@@ -16,7 +16,14 @@ Game::~Game() {
 	delete little_wolf_;
 }
 
-void Game::init() {
+bool Game::init(char* host, Uint16 port) {
+
+	net_ = new Networking();
+
+	if (!net_->init(host, port)) {
+		SDLNetUtils::print_SDLNet_error();
+	}
+	std::cout << "Connected as client " << (int)net_->client_id() << std::endl;
 
 	// initialize the SDLUtils singleton
 	SDLUtils::init("Demo", 900, 480,
@@ -33,6 +40,8 @@ void Game::init() {
 	little_wolf_->addPlayer(1);
 	little_wolf_->addPlayer(2);
 	little_wolf_->addPlayer(3);
+
+	return true;
 }
 
 void Game::start() {
