@@ -120,6 +120,8 @@ void LittleWolf::send_my_state()
 
 void LittleWolf::update_player_state(Uint8 id, float ax, float ay, float bx, float by, float whx, float why, float theta)
 {
+	map_.walling[(int)players_[id].where.y][(int)players_[id].where.x] = 0;
+
 	std::cout << "Player state" << std::endl;
 	players_[id].fov.a.x = ax;
 	players_[id].fov.a.y = ay;
@@ -128,10 +130,14 @@ void LittleWolf::update_player_state(Uint8 id, float ax, float ay, float bx, flo
 	players_[id].where.x = whx;
 	players_[id].where.y = why;
 	players_[id].theta = theta;
+
+	map_.walling[(int)players_[id].where.y][(int)players_[id].where.x] = player_to_tile(id);
 }
 
 void LittleWolf::update_player_info(Uint8 id, float ax, float ay, float bx, float by, float whx, float why, float theta, Uint8 state)
 {
+	map_.walling[(int)players_[id].where.y][(int)players_[id].where.x] = 0;
+
 	std::cout << "Player info" << std::endl;
 	players_[id].fov.a.x = ax;
 	players_[id].fov.a.y = ay;
@@ -141,6 +147,8 @@ void LittleWolf::update_player_info(Uint8 id, float ax, float ay, float bx, floa
 	players_[id].where.y = why;
 	players_[id].theta = theta;
 	players_[id].state = static_cast<PlayerState>(state);
+
+	map_.walling[(int)players_[id].where.y][(int)players_[id].where.x] = player_to_tile(id);
 }
 
 void LittleWolf::load(std::string filename) {
