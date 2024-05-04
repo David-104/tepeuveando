@@ -146,6 +146,8 @@ public:
 
 	void send_my_info();
 
+	void send_my_state();
+
 	void update_player_state(Uint8 id, float ax, float ay, float bx, float by, float whx, float why, float theta);
 
 	void update_player_info(Uint8 id, float ax , float ay , float bx, float by, float whx, float why, float theta, Uint8 state);

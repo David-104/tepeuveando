@@ -45,7 +45,7 @@ void LittleWolf::update() {
 	move(p);  // handle moving
 	shoot(p); // handle shooting
 
-	
+	send_my_state();
 }
 
 bool LittleWolf::initPlayer(std::uint8_t id)
@@ -111,8 +111,16 @@ void LittleWolf::send_my_info()
 	Game::instance()->get_networking().send_my_info(p.fov, p.where, p.theta, p.state);
 }
 
+void LittleWolf::send_my_state()
+{
+	Player& p = players_[player_id_];
+
+	Game::instance()->get_networking().send_state(p.fov, p.where, p.theta);
+}
+
 void LittleWolf::update_player_state(Uint8 id, float ax, float ay, float bx, float by, float whx, float why, float theta)
 {
+	std::cout << "Player state" << std::endl;
 	players_[id].fov.a.x = ax;
 	players_[id].fov.a.y = ay;
 	players_[id].fov.b.x = bx;
@@ -124,6 +132,7 @@ void LittleWolf::update_player_state(Uint8 id, float ax, float ay, float bx, flo
 
 void LittleWolf::update_player_info(Uint8 id, float ax, float ay, float bx, float by, float whx, float why, float theta, Uint8 state)
 {
+	std::cout << "Player info" << std::endl;
 	players_[id].fov.a.x = ax;
 	players_[id].fov.a.y = ay;
 	players_[id].fov.b.x = bx;

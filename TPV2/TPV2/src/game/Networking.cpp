@@ -99,31 +99,34 @@ void Networking::update() {
 	PlayerInfoMsg m5;
 
 	while (SDLNetUtils::deserializedReceive(m0, p_, sock_) > 0) {
-
 		switch (m0._type) {
 		case _NEW_CLIENT_CONNECTED:
+			//std::cout << "new client";
 			m1.deserialize(p_->data);
 			masterId_ = m1._master_id;
 			handle_new_client(m1._client_id);
 			break;
 
 		case _DISCONNECTED:
+			//std::cout << "disconnected";
 			m1.deserialize(p_->data);
 			masterId_ = m1._master_id;
 			handle_disconnet(m1._client_id);
 			break;
 
 		case _PLAYER_STATE:
+			//std::cout << "player state";
 			m2.deserialize(p_->data);
 			handle_player_state(m2);
 			break;
 
 		case _PLAYER_INFO:
+			//std::cout << "player info";
 			m5.deserialize(p_->data);
 			handle_player_info(m5);
 			break;
 
-		case _SHOOT:
+		/*case _SHOOT:
 			m3.deserialize(p_->data);
 			handle_shoot(m3);
 			break;
@@ -136,7 +139,7 @@ void Networking::update() {
 		case _RESTART:
 			handle_restart();
 			break;
-
+			*/
 		default:
 			break;
 		}
