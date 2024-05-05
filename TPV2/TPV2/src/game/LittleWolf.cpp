@@ -147,6 +147,9 @@ void LittleWolf::update_player_info(Uint8 id, float ax, float ay, float bx, floa
 	players_[id].state = static_cast<PlayerState>(state);
 	map_.walling[(int)players_[id].where.y][(int)players_[id].where.x] = player_to_tile(id);
 
+#if _DEBUG
+	printf("Update info player %d state %d\n", id, (int)players_[id].state);
+#endif
 }
 
 void LittleWolf::load(std::string filename) {
@@ -432,6 +435,10 @@ void LittleWolf::render_players_info() {
 
 	for (auto i = 0u; i < max_player; i++) {
 		PlayerState s = players_[i].state;
+
+    #if _DEBUG
+		//printf("Player %d state %d\n", (int)players_[i].id, (int)(players_[i].state));
+    #endif
 
 		// render player info if it is used
 		if (s != NOT_USED) {

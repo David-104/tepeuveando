@@ -220,6 +220,9 @@ void Networking::send_my_info(LittleWolf::Line& fov,LittleWolf::Point& where, fl
 	m.why = where.y;
 	m.theta = theta;
 	m.state = state;
+#if _DEBUG
+	printf("Send info player %d state %d\n", clientId_, (int)state);
+#endif
 	SDLNetUtils::serializedSend(m, p_, sock_, srvadd_);
 }
 
