@@ -111,8 +111,8 @@ void LittleWolf::update_player_info(int playerID, float ax, float ay, float bx, 
 				theta,
 				state };
 
-	map_.walling[(int)players_[playerID].where.y][(int)players_[playerID].where.x] = player_to_tile(playerID);
 	players_[playerID] = player;
+	map_.walling[(int)players_[playerID].where.y][(int)players_[playerID].where.x] = player_to_tile(playerID);
 }
 
 void LittleWolf::load(std::string filename) {
