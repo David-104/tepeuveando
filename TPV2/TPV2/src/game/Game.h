@@ -9,8 +9,8 @@ class LittleWolf;
 
 class Game : public Singleton<Game> {
 	friend Singleton<Game>;
-public:
 	Game();
+public:
 	virtual ~Game();
 	bool init(char* host, Uint16 port);
 	void start();

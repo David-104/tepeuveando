@@ -45,55 +45,13 @@ void LittleWolf::update() {
 	spin(p);  // handle spinning
 	move(p);  // handle moving
 	shoot(p); // handle shooting
-
-	send_my_state();
 }
 
-bool LittleWolf::initPlayer(std::uint8_t id)
+/*bool LittleWolf::initPlayer(std::uint8_t id)
 {
-	assert(id < max_player);
-
-	if (players_[id].state != NOT_USED)
-		return false;
-
-	auto& rand = sdlutils().rand();
-
-	// The search for an empty cell start at a random position (orow,ocol)
-	uint16_t orow = rand.nextInt(0, map_.walling_height);
-	uint16_t ocol = rand.nextInt(0, map_.walling_width);
-
-	// search for an empty cell
-	uint16_t row = orow;
-	uint16_t col = (ocol + 1) % map_.walling_width;
-	while (!((orow == row) && (ocol == col)) && map_.walling[row][col] != 0) {
-		col = (col + 1) % map_.user_walling_width;
-		if (col == 0)
-			row = (row + 1) % map_.walling_height;
-	}
-
-	// handle the case where the search is failed, which in principle should never
-	// happen unless we start with map with few empty cells
-	if (row >= map_.walling_height)
-		return false;
-
-	// initialize the player
-	Player p = { //
-			id, //
-					viewport(0.8f),             // focal
-					{ col + 0.5f, row + 0.5f }, // Where.
-					{ 0.0f, 0.0f }, 			// Velocity.
-					2.0f, 			            // Speed.
-					0.9f,		            	// Acceleration.
-					0.0f, 			            // Rotation angle in radians.
-					ALIVE                       // Player state
-	};
-
-	// not that player <id> is stored in the map as player_to_tile(id) -- which is id+10
-	map_.walling[(int)p.where.y][(int)p.where.x] = player_to_tile(id);
-	players_[id] = p;
 
 	return true;
-}
+}*/
 
 void LittleWolf::removePlayer(std::uint8_t id)
 {
@@ -107,19 +65,19 @@ void LittleWolf::killPlayer(std::uint8_t id)
 
 void LittleWolf::send_my_info()
 {
-	Player& p = players_[player_id_];
+	Player& player = players_[player_id_];
 
-	Game::instance()->get_networking().send_my_info(p.fov, p.where, p.theta, p.state);
+	Game::instance()->get_networking().send_my_info(Vector2D(player.where.x, player.where.y),Vector2D(player.velocity.x, player.velocity.y), player.speed,player.acceleration,player.theta, player.state);
 }
 
-void LittleWolf::send_my_state()
+/*void LittleWolf::send_my_state()
 {
 	Player& p = players_[player_id_];
 
 	Game::instance()->get_networking().send_state(p.fov, p.where, p.theta);
-}
+}*/
 
-void LittleWolf::update_player_state(Uint8 id, float ax, float ay, float bx, float by, float whx, float why, float theta)
+/*void LittleWolf::update_player_state(Uint8 id, float ax, float ay, float bx, float by, float whx, float why, float theta)
 {
 	map_.walling[(int)players_[id].where.y][(int)players_[id].where.x] = 0;
 	players_[id].fov.a.x = ax;
@@ -131,25 +89,23 @@ void LittleWolf::update_player_state(Uint8 id, float ax, float ay, float bx, flo
 	players_[id].theta = theta;
 
 	map_.walling[(int)players_[id].where.y][(int)players_[id].where.x] = player_to_tile(id);
-}
+}*/
 
-void LittleWolf::update_player_info(Uint8 id, float ax, float ay, float bx, float by, float whx, float why, float theta, Uint8 state)
+void LittleWolf::update_player_info(int playerID, float posX, float posY, float velX, float velY, float speed, float acceleration, float theta, PlayerState state)
 {
+	if (players_[playerID].state == NOT_USED) {
+		Player player = { (uint8_t)playerID,
+					viewport(0.8f),
+					{ posX + 0.5f, posY + 0.5f },
+					{ velX,velY },
+					speed,
+					acceleration,
+					theta,
+					ALIVE };
 
-	map_.walling[(int)players_[id].where.y][(int)players_[id].where.x] = 0;
-	players_[id].fov.a.x = ax;
-	players_[id].fov.a.y = ay;
-	players_[id].fov.b.x = bx;
-	players_[id].fov.b.y = by;
-	players_[id].where.x = whx;
-	players_[id].where.y = why;
-	players_[id].theta = theta;
-	players_[id].state = static_cast<PlayerState>(state);
-	map_.walling[(int)players_[id].where.y][(int)players_[id].where.x] = player_to_tile(id);
-
-#if _DEBUG
-	printf("Update info player %d state %d\n", id, (int)players_[id].state);
-#endif
+		map_.walling[(int)player.where.y][(int)player.where.x] = player_to_tile(playerID);
+		players_[playerID] = player;
+	}
 }
 
 void LittleWolf::load(std::string filename) {
@@ -242,9 +198,47 @@ void LittleWolf::load(std::string filename) {
 }
 
 bool LittleWolf::addPlayer(std::uint8_t id) {
-	initPlayer(id);
+	assert(id < max_player);
+
+	if (players_[id].state != NOT_USED)
+		return false;
+
+	auto& rand = sdlutils().rand();
+
+	// The search for an empty cell start at a random position (orow,ocol)
+	uint16_t orow = rand.nextInt(0, map_.walling_height);
+	uint16_t ocol = rand.nextInt(0, map_.walling_width);
+
+	// search for an empty cell
+	uint16_t row = orow;
+	uint16_t col = (ocol + 1) % map_.walling_width;
+	while (!((orow == row) && (ocol == col)) && map_.walling[row][col] != 0) {
+		col = (col + 1) % map_.user_walling_width;
+		if (col == 0)
+			row = (row + 1) % map_.walling_height;
+	}
+
+	// handle the case where the search is failed, which in principle should never
+	// happen unless we start with map with few empty cells
+	if (row >= map_.walling_height)
+		return false;
+
+	// initialize the player
+	Player p = { //
+			id, //
+					viewport(0.8f),             // focal
+					{ col + 0.5f, row + 0.5f }, // Where.
+					{ 0.0f, 0.0f }, 			// Velocity.
+					2.0f, 			            // Speed.
+					0.9f,		            	// Acceleration.
+					0.0f, 			            // Rotation angle in radians.
+					ALIVE                       // Player state
+	};
+
+	// not that player <id> is stored in the map as player_to_tile(id) -- which is id+10
+	map_.walling[(int)p.where.y][(int)p.where.x] = player_to_tile(id);
+	players_[id] = p;
 	player_id_ = id;
-	send_my_info();
 	return true;
 }
 

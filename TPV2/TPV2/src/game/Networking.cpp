@@ -5,7 +5,6 @@
 #include <iostream>
 #include "Game.h"
 #include "LittleWolf.h"
-#include "LittleWolf.h"
 #include "netwrok_messages.h"
 #include "../sdlutils/SDLNetUtils.h"
 #include "..\utils/Vector2D.h"
@@ -114,11 +113,11 @@ void Networking::update() {
 			handle_disconnet(m1._client_id);
 			break;
 
-		case _PLAYER_STATE:
+		/*case _PLAYER_STATE:
 			//std::cout << "player state";
 			m2.deserialize(p_->data);
 			handle_player_state(m2);
-			break;
+			break;*/
 
 		case _PLAYER_INFO:
 			//std::cout << "player info";
@@ -155,7 +154,7 @@ void Networking::handle_disconnet(Uint8 id) {
 	Game::instance()->get_littlewolf().removePlayer(id);
 }
 
-void Networking::send_state(LittleWolf::Line& fov, LittleWolf::Point& where, float theta) {
+/*void Networking::send_state(LittleWolf::Line& fov, LittleWolf::Point& where, float theta) {
 	PlayerInfoMsg m;
 	m._type = _PLAYER_STATE;
 	m._client_id = clientId_;
@@ -167,14 +166,14 @@ void Networking::send_state(LittleWolf::Line& fov, LittleWolf::Point& where, flo
 	m.why = where.y;
 	m.theta = theta;
 	SDLNetUtils::serializedSend(m, p_, sock_, srvadd_);
-}
+}*/
 
-void Networking::handle_player_state(const PlayerStateMsg &m) {
+/*void Networking::handle_player_state(const PlayerStateMsg &m) {
 
 	if (m._client_id != clientId_) {
 		Game::instance()->get_littlewolf().update_player_state(m.id, m.ax, m.ay, m.bx, m.by, m.whx, m.why, m.theta);
 	}
-}
+}*/
 
 void Networking::send_shoot(Vector2D p, Vector2D v, int width, int height,
 		float r) {
@@ -208,27 +207,24 @@ void Networking::handle_dead(const MsgWithId &m) {
 	Game::instance()->get_littlewolf().killPlayer(m._client_id);
 }
 
-void Networking::send_my_info(LittleWolf::Line& fov,LittleWolf::Point& where, float theta, LittleWolf::PlayerState state) {
+void Networking::send_my_info(const Vector2D& pos, const Vector2D& vel, float s, float a, float rot, Uint8 state) {
 	PlayerInfoMsg m;
 	m._type = _PLAYER_INFO;
 	m._client_id = clientId_;
-	m.ax = fov.a.x;
-	m.ay = fov.a.y;
-	m.bx = fov.b.x;
-	m.by = fov.b.y;
-	m.whx = where.x;
-	m.why = where.y;
-	m.theta = theta;
+	m.pos_x = pos.getX();
+	m.pos_y = pos.getY();
+	m.vel_x = vel.getX();
+	m.vel_y = vel.getY();
+	m.speed = s;
+	m.a = a;
+	m.rot = rot;
 	m.state = state;
-#if _DEBUG
-	printf("Send info player %d state %d\n", clientId_, (int)state);
-#endif
 	SDLNetUtils::serializedSend(m, p_, sock_, srvadd_);
 }
 
-void Networking::handle_player_info(const PlayerInfoMsg &m) {
+void Networking::handle_player_info(const PlayerInfoMsg& m) {
 	if (m._client_id != clientId_) {
-		Game::instance()->get_littlewolf().update_player_info(m.id, m.ax, m.ay, m.bx, m.by, m.whx, m.why, m.theta, m.state);
+		Game::instance()->get_littlewolf().update_player_info(m._client_id, m.pos_x,m.pos_y, m.vel_x, m.vel_y, m.speed, m.a, m.rot, (LittleWolf::PlayerState)m.state);
 	}
 }
 

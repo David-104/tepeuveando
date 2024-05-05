@@ -26,8 +26,8 @@ public:
 		return clientId_ == masterId_;
 	}
 
-	void send_state(LittleWolf::Line& fov, LittleWolf::Point& where, float theta);
-	void send_my_info(LittleWolf::Line& fov, LittleWolf::Point& where, float theta, LittleWolf::PlayerState state);
+	//void send_state(LittleWolf::Line& fov, LittleWolf::Point& where, float theta);
+	void send_my_info(const Vector2D& pos, const Vector2D& vel, float s, float a, float rot, Uint8 state);
 	
 	void send_shoot(Vector2D p, Vector2D v, int width, int height, float r);
 	void send_dead(Uint8 id);
@@ -37,7 +37,7 @@ private:
 
 	void handle_new_client(Uint8 id);
 	void handle_disconnet(Uint8 id);
-	void handle_player_state(const PlayerStateMsg &m);
+	//void handle_player_state(const PlayerStateMsg &m);
 	void handle_player_info(const PlayerInfoMsg &m);
 	void handle_shoot(const ShootMsg &m);
 	void handle_dead(const MsgWithId &m);

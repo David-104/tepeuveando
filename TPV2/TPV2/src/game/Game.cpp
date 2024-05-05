@@ -38,7 +38,7 @@ bool Game::init(char* host, Uint16 port) {
 
 	// add some players
 	little_wolf_->addPlayer(net_->client_id());
-
+	little_wolf_->send_my_info();
 
 	return true;
 }
@@ -63,7 +63,7 @@ void Game::start() {
 				continue;
 			}
 
-			// N switches to the next player view
+			/*// N switches to the next player view
 			if (ihdlr.isKeyDown(SDL_SCANCODE_N)) {
 				little_wolf_->switchToNextPlayer();
 			}
@@ -71,11 +71,12 @@ void Game::start() {
 			// R brings deads to life
 			if (ihdlr.isKeyDown(SDL_SCANCODE_R)) {
 				little_wolf_->bringAllToLife();
-			}
+			}*/
 
 		}
 
 		little_wolf_->update();
+		little_wolf_->send_my_info();
 	    net_->update();
 
 		// the clear is not necessary since we copy the whole texture -- I guess ...
