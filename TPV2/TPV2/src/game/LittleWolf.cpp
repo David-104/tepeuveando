@@ -94,26 +94,25 @@ void LittleWolf::send_my_info()
 
 void LittleWolf::update_player_info(int playerID, float ax, float ay, float bx, float by, float posX, float posY, float velX, float velY, float speed, float acceleration, float theta, PlayerState state)
 {
-	if (players_[playerID].state == NOT_USED) {
+	map_.walling[(int)players_[playerID].where.y][(int)players_[playerID].where.x] = 0;
 
-		Line aux;
-		aux.a.x = ax;
-		aux.a.y = ay;
-		aux.b.x = bx;
-		aux.b.y = by;
+	Line aux;
+	aux.a.x = ax;
+	aux.a.y = ay;
+	aux.b.x = bx;
+	aux.b.y = by;
 
-		Player player = { (uint8_t)playerID,
-					aux,
-					{ posX + 0.5f, posY + 0.5f },
-					{ velX,velY },
-					speed,
-					acceleration,
-					theta,
-					ALIVE };
+	Player player = { (uint8_t)playerID,
+				aux,
+				{ posX + 0.5f, posY + 0.5f },
+				{ velX,velY },
+				speed,
+				acceleration,
+				theta,
+				state };
 
-		map_.walling[(int)player.where.y][(int)player.where.x] = player_to_tile(playerID);
-		players_[playerID] = player;
-	}
+	map_.walling[(int)players_[playerID].where.y][(int)players_[playerID].where.x] = player_to_tile(playerID);
+	players_[playerID] = player;
 }
 
 void LittleWolf::load(std::string filename) {
