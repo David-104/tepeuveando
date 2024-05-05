@@ -147,7 +147,7 @@ public:
 
 	//void update_player_state(Uint8 id, float ax, float ay, float bx, float by, float whx, float why, float theta);
 
-	void update_player_info(int playerID, float posX, float posY, float velX, float velY, float speed, float acceleration, float theta, PlayerState state);
+	void update_player_info(int playerID, float ax, float ay, float bx, float by, float posX, float posY, float velX, float velY, float speed, float acceleration, float theta, PlayerState state);
 
 
 private:

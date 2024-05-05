@@ -67,7 +67,8 @@ void LittleWolf::send_my_info()
 {
 	Player& player = players_[player_id_];
 
-	Game::instance()->get_networking().send_my_info(Vector2D(player.where.x, player.where.y),Vector2D(player.velocity.x, player.velocity.y), player.speed,player.acceleration,player.theta, player.state);
+	
+	Game::instance()->get_networking().send_my_info(Vector2D(player.fov.a.x, player.fov.a.y), Vector2D(player.fov.b.x, player.fov.b.y), Vector2D(player.where.x, player.where.y),Vector2D(player.velocity.x, player.velocity.y), player.speed,player.acceleration,player.theta, player.state);
 }
 
 /*void LittleWolf::send_my_state()
@@ -91,11 +92,18 @@ void LittleWolf::send_my_info()
 	map_.walling[(int)players_[id].where.y][(int)players_[id].where.x] = player_to_tile(id);
 }*/
 
-void LittleWolf::update_player_info(int playerID, float posX, float posY, float velX, float velY, float speed, float acceleration, float theta, PlayerState state)
+void LittleWolf::update_player_info(int playerID, float ax, float ay, float bx, float by, float posX, float posY, float velX, float velY, float speed, float acceleration, float theta, PlayerState state)
 {
 	if (players_[playerID].state == NOT_USED) {
+
+		Line aux;
+		aux.a.x = ax;
+		aux.a.y = ay;
+		aux.b.x = bx;
+		aux.b.y = by;
+
 		Player player = { (uint8_t)playerID,
-					viewport(0.8f),
+					aux,
 					{ posX + 0.5f, posY + 0.5f },
 					{ velX,velY },
 					speed,
