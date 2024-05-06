@@ -8,7 +8,7 @@
 #include "Networking.h"
 
 Game::Game() :
-		little_wolf_(nullptr), net_(nullptr) //
+		little_wolf_(nullptr), net_(nullptr)//
 {
 }
 
@@ -51,8 +51,7 @@ void Game::start() {
 	auto &ihdlr = ih();
 
 	while (!exit) {
-		Uint32 startTime = sdlutils().currRealTime();
-
+	    startTime = sdlutils().currRealTime();
 		// refresh the input handler
 		ihdlr.refresh();
 		if (ihdlr.keyDownEvent()) {
@@ -63,31 +62,22 @@ void Game::start() {
 				continue;
 			}
 
-			/*// N switches to the next player view
-			if (ihdlr.isKeyDown(SDL_SCANCODE_N)) {
-				little_wolf_->switchToNextPlayer();
-			}
-
-			// R brings deads to life
-			if (ihdlr.isKeyDown(SDL_SCANCODE_R)) {
-				little_wolf_->bringAllToLife();
-			}*/
-
 		}
+		printf("bucle de game");
 
+		net_->update();
 		little_wolf_->update();
 		little_wolf_->send_my_info();
-	    net_->update();
+
 
 		// the clear is not necessary since we copy the whole texture -- I guess ...
-		// sdlutils().clearRenderer();
+		sdlutils().clearRenderer();
 
 		little_wolf_->render();
 
 		sdlutils().presentRenderer();
 
-
-		Uint32 frameTime = sdlutils().currRealTime() - startTime;
+	    frameTime = sdlutils().currRealTime() - startTime;
 
 		if (frameTime < 10)
 			SDL_Delay(10 - frameTime);

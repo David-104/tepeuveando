@@ -16,7 +16,9 @@ enum MsgType : Uint8 {
 	_PLAYER_INFO, //
 	_SHOOT, //
 	_DEAD, //
-	_RESTART
+	_RESTART,
+	_START_WAIT_TIME,
+	_TIME_LEFT_RESTART
 };
 
 struct Msg {
@@ -82,5 +84,10 @@ struct ShootMsg: MsgWithId {
 	float theta;   // rotation (in rad)
 
 	_IMPL_SERIALIAZION_WITH_BASE_(MsgWithId, ax,ay,bx,by,whx,why,theta)
+};
 
+struct MsgTimeLeft : Msg {
+	int time;
+
+	_IMPL_SERIALIAZION_WITH_BASE_(Msg, time)
 };

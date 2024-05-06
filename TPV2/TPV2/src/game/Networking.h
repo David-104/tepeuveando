@@ -32,6 +32,8 @@ public:
 	void send_shoot(Uint8, LittleWolf::Line, LittleWolf::Point, float);
 	void send_dead(Uint8 id);
 	void send_restart();
+	void start_wait_time();
+	void send_time_left(int time);
 
 private:
 
@@ -42,6 +44,7 @@ private:
 	void handle_shoot(const ShootMsg &m);
 	void handle_dead(const MsgWithId &m);
 	void handle_restart();
+	void handle_time_left(const MsgTimeLeft& m);
 
 	UDPsocket sock_;
 	SDLNet_SocketSet socketSet_;

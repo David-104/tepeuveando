@@ -19,8 +19,14 @@ public:
 
 	LittleWolf& get_littlewolf() { return *little_wolf_; }
 
+	Uint32 get_startTime() { return startTime; }
+	Uint32 get_frameTime() { return frameTime; }
+
 private:
 	LittleWolf *little_wolf_;
 	Networking* net_;
+
+	Uint32 startTime;
+	Uint32 frameTime;
 };
 

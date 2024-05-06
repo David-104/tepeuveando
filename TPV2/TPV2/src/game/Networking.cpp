@@ -96,6 +96,7 @@ void Networking::update() {
 	ShootMsg m3;
 	MsgWithId m4;
 	PlayerInfoMsg m5;
+	MsgTimeLeft m6;
 
 	while (SDLNetUtils::deserializedReceive(m0, p_, sock_) > 0) {
 		switch (m0._type) {
@@ -120,7 +121,6 @@ void Networking::update() {
 			break;*/
 
 		case _PLAYER_INFO:
-			//std::cout << "player info";
 			m5.deserialize(p_->data);
 			handle_player_info(m5);
 			break;
@@ -134,12 +134,12 @@ void Networking::update() {
 			m4.deserialize(p_->data);
 			handle_dead(m4);
 			break;
-
-		/*
 		case _RESTART:
 			handle_restart();
 			break;
-			*/
+		case _START_WAIT_TIME:
+			Game::instance()->get_littlewolf().startWaitTime();
+			break;
 		default:
 			break;
 		}
@@ -223,6 +223,7 @@ void Networking::send_dead(Uint8 id) {
 
 void Networking::handle_dead(const MsgWithId &m) {
 	Game::instance()->get_littlewolf().killPlayer(m._client_id);
+	
 }
 
 void Networking::send_my_info(const LittleWolf::Point& a, const LittleWolf::Point& b, const LittleWolf::Point& pos, const LittleWolf::Point& vel, float s, float acc, float rot, Uint8 state) {
@@ -256,7 +257,29 @@ void Networking::send_restart() {
 	SDLNetUtils::serializedSend(m, p_, sock_, srvadd_);
 }
 
+void Networking::start_wait_time()
+{
+	Msg m;
+	m._type = _START_WAIT_TIME;
+	printf("wait time started \n");
+
+	SDLNetUtils::serializedSend(m, p_, sock_, srvadd_);
+}
+
+void Networking::send_time_left(int time)
+{
+	MsgTimeLeft m;
+	m._type = _TIME_LEFT_RESTART;
+	m.time = time;
+
+	SDLNetUtils::serializedSend(m, p_, sock_, srvadd_);
+}
+
 void Networking::handle_restart() {
 	Game::instance()->get_littlewolf().bringAllToLife();
-
 }
+
+void Networking::handle_time_left(const MsgTimeLeft& m) {
+	Game::instance()->get_littlewolf().renderWithTime(m.time);
+}
+

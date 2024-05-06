@@ -14,6 +14,7 @@
 #include <fstream>
 
 #include "../sdlutils/InputHandler.h"
+#include "../sdlutils/SDLUtils.h"
 
 class LittleWolf {
 public:
@@ -153,7 +154,14 @@ public:
 
 	void update_player_info(int playerID, float ax, float ay, float bx, float by, float posX, float posY, float velX, float velY, float speed, float acceleration, float theta, PlayerState state);
 
+	void renderWithTime(int time);
 
+	void startWaitTime()
+	{
+		waitingRestart = true;
+		currWaitTime = maxWaitTime;
+		lastFrame = sdlutils().virtualTimer().currTime();
+	}
 private:
 
 	// Calculates wall size using the <corrected> ray to the wall.
@@ -390,5 +398,8 @@ private:
 	// the GPU structure with all the needed elements to draw the world
 	Gpu gpu_;
 
+	bool waitingRestart;
+
+	float maxWaitTime, currWaitTime, lastFrame;
 };
 

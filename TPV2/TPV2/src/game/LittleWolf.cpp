@@ -8,7 +8,6 @@
 #include <string>
 
 #include "Game.h"
-#include "../sdlutils/SDLUtils.h"
 #include "../sdlutils/Texture.h"
 #include "Networking.h"
 
@@ -19,7 +18,10 @@ LittleWolf::LittleWolf(uint16_t xres, uint16_t yres, SDL_Window *window,
 				std::min(walling_width, walling_height) / 2), // the shoot distance -- not that it's wrt to the walling size
 		map_(), //
 		players_(), //
-		player_id_(0) { // we start with player 0
+		player_id_(0), // we start with player 0
+        waitingRestart(),
+        maxWaitTime(5000)
+        { 
 
 	// for some reason it is created with a rotation of 90 degrees -- must be easier to
 	// manipulate coordinates
@@ -36,15 +38,33 @@ LittleWolf::~LittleWolf() {
 
 void LittleWolf::update() {
 
-	Player &p = players_[player_id_];
+	Player& p = players_[player_id_];
 
-	// dead player don't move/spin/shoot
-	if (p.state != ALIVE)
-		return;
+	if(!waitingRestart)
+	{
+		// dead player don't move/spin/shoot
+		if (p.state != ALIVE)
+			return;
 
-	spin(p);  // handle spinning
-	move(p);  // handle moving
-	shoot(p); // handle shooting
+		spin(p);  // handle spinning
+		move(p);  // handle moving
+		shoot(p); // handle shooting
+
+		printf("update");
+	}
+	else
+	{
+		currWaitTime -= (sdlutils().virtualTimer().currTime() - lastFrame);
+
+		lastFrame = sdlutils().virtualTimer().currTime();
+
+		printf(std::to_string(currWaitTime).c_str());
+
+		if (Game::instance()->get_networking().is_master() && currWaitTime <= 0) {
+			printf("domingo de resurreccion");
+			Game::instance()->get_networking().send_restart();
+		}
+	}
 }
 
 /*bool LittleWolf::initPlayer(std::uint8_t id)
@@ -60,29 +80,53 @@ void LittleWolf::removePlayer(std::uint8_t id)
 
 void LittleWolf::killPlayer(std::uint8_t id)
 {
-	players_[id].state = LittleWolf::DEAD;
-
-	if (id != player_id_)
+	if (players_[id].state != DEAD)
 	{
-		Point& p = players_[player_id_].where;
-		Point& otherp = players_[id].where;
-		//esto es la formula del modulo pero muy larga xq no se pueden poner caudrados
-		float distance = sqrt((p.x - otherp.x) * (p.x - otherp.x) + (p.y - otherp.y) * (p.y - otherp.y));
+		players_[id].state = LittleWolf::DEAD;
 
-		if (distance == 0)
-			SoundEffect::setChannelVolume(128); //para eviar divisiones con 0
+		if (id != player_id_)
+		{
+			Point& p = players_[player_id_].where;
+			Point& otherp = players_[id].where;
+			//esto es la formula del modulo pero muy larga xq no se pueden poner caudrados
+			float distance = sqrt((p.x - otherp.x) * (p.x - otherp.x) + (p.y - otherp.y) * (p.y - otherp.y));
+
+			if (distance == 0)
+				SoundEffect::setChannelVolume(128); //para eviar divisiones con 0
+			else
+			{
+				float volume = 128 / distance; //128 es el volumen maximo
+				SoundEffect::setChannelVolume(volume);
+			}
+			sdlutils().soundEffects().at("pain").play();
+		}
 		else
 		{
-			float volume = 128 / distance; //128 es el volumen maximo
-			SoundEffect::setChannelVolume(volume);
+			SoundEffect::setChannelVolume(128);
+			sdlutils().soundEffects().at("pain").play();
 		}
-		sdlutils().soundEffects().at("pain").play();
-	}
 
-	else
-	{
-		SoundEffect::setChannelVolume(128);
-		sdlutils().soundEffects().at("pain").play();
+		if (Game::instance()->get_networking().is_master())
+		{
+			printf("master is ");
+			printf(std::to_string(player_id_).c_str());
+			printf("\n");
+			int alivePlayers = 0;
+			for (int i = 0; i < max_player; i++)
+			{
+				if (players_[i].state == ALIVE)
+					alivePlayers++;
+			}
+
+			printf("players alive: ");
+			printf(std::to_string(alivePlayers).c_str());
+			printf("\n");
+
+			if (alivePlayers < 2)
+			{
+				Game::instance()->get_networking().start_wait_time();
+			}
+		}
 	}
 }
 
@@ -171,7 +215,7 @@ void LittleWolf::update_player_info(int playerID, float ax, float ay, float bx, 
 {
 	if (Game::instance()->get_networking().is_master())
 	{
-		auto p = players_[playerID];
+		/*auto p = players_[playerID];
 		Point zero = { 0, 0 };
 		Point last = p.where;
 
@@ -180,7 +224,7 @@ void LittleWolf::update_player_info(int playerID, float ax, float ay, float bx, 
 			p.velocity = zero;
 			p.where = last;
 			Game::instance()->get_networking().send_my_info(p.fov.a, p.fov.b, p.where, p.velocity, p.speed, p.acceleration, p.theta, p.state);
-		}
+		}*/
 		/*else { // otherwise we make a move
 			int y0 = (int)last.y;
 			int x0 = (int)last.x;
@@ -358,6 +402,10 @@ void LittleWolf::render() {
 
 	// render the identifiers, state, etc
 	render_players_info();
+
+	//if waiting, render the wait time
+	if (waitingRestart)
+		renderWithTime(currWaitTime);
 }
 
 LittleWolf::Hit LittleWolf::cast(const Point where, Point direction,
@@ -657,4 +705,27 @@ void LittleWolf::bringAllToLife() {
 			players_[i].state = ALIVE;
 		}
 	}
+	waitingRestart = false;
+}
+
+void LittleWolf::renderWithTime(int time)
+{
+	render();
+
+	std::string msg = ("GAME WILL RESTART IN " + std::to_string(time) + " SECONDS");
+#if _DEBUG
+	printf(msg.c_str());
+	printf("\n");
+#endif
+
+	Texture info(sdlutils().renderer(), msg,
+		sdlutils().fonts().at("ARIAL24"),
+		build_sdlcolor(color_rgba(7)));
+
+	int x = sdlutils().width() / 2 - info.width() / 2;
+	int y = sdlutils().height() / 2 - info.height() / 2;
+
+	SDL_Rect dest = build_sdlrect(x, y, info.width(), info.height());
+
+	info.render(dest);
 }
