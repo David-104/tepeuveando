@@ -225,18 +225,18 @@ void Networking::handle_dead(const MsgWithId &m) {
 	Game::instance()->get_littlewolf().killPlayer(m._client_id);
 }
 
-void Networking::send_my_info(const Vector2D& a, const Vector2D& b, const Vector2D& pos, const Vector2D& vel, float s, float acc, float rot, Uint8 state) {
+void Networking::send_my_info(const LittleWolf::Point& a, const LittleWolf::Point& b, const LittleWolf::Point& pos, const LittleWolf::Point& vel, float s, float acc, float rot, Uint8 state) {
 	PlayerInfoMsg m;
 	m._type = _PLAYER_INFO;
 	m._client_id = clientId_;
-	m.ax = a.getX();
-	m.ay = a.getY();
-	m.bx = b.getX();
-	m.by = b.getY();
-	m.pos_x = pos.getX();
-	m.pos_y = pos.getY();
-	m.vel_x = vel.getX();
-	m.vel_y = vel.getY();
+	m.ax = a.x;
+	m.ay = a.y;
+	m.bx = b.x;
+	m.by = b.y;
+	m.pos_x = pos.x;
+	m.pos_y = pos.y;
+	m.vel_x = vel.x;
+	m.vel_y = vel.y;
 	m.speed = s;
 	m.a = acc;
 	m.rot = rot;

@@ -91,7 +91,7 @@ void LittleWolf::send_my_info()
 	Player& player = players_[player_id_];
 
 	
-	Game::instance()->get_networking().send_my_info(Vector2D(player.fov.a.x, player.fov.a.y), Vector2D(player.fov.b.x, player.fov.b.y), Vector2D(player.where.x, player.where.y),Vector2D(player.velocity.x, player.velocity.y), player.speed,player.acceleration,player.theta, player.state);
+	Game::instance()->get_networking().send_my_info(player.fov.a, player.fov.b, player.where,player.velocity, player.speed,player.acceleration,player.theta, player.state);
 }
 
 void LittleWolf::checkForCollision(Uint8 clientId_, LittleWolf::Line fov, LittleWolf::Point where, float theta)
@@ -169,6 +169,29 @@ void LittleWolf::playShoot(Uint8 clientId_)
 
 void LittleWolf::update_player_info(int playerID, float ax, float ay, float bx, float by, float posX, float posY, float velX, float velY, float speed, float acceleration, float theta, PlayerState state)
 {
+	if (Game::instance()->get_networking().is_master())
+	{
+		auto p = players_[playerID];
+		Point zero = { 0, 0 };
+		Point last = p.where;
+
+		if (tile(p.where, map_.walling) != 10 + player_id_
+			&& tile(p.where, map_.walling) != 0) {
+			p.velocity = zero;
+			p.where = last;
+			Game::instance()->get_networking().send_my_info(p.fov.a, p.fov.b, p.where, p.velocity, p.speed, p.acceleration, p.theta, p.state);
+		}
+		/*else { // otherwise we make a move
+			int y0 = (int)last.y;
+			int x0 = (int)last.x;
+			int y1 = (int)p.where.y;
+			int x1 = (int)p.where.x;
+			if (x0 != x1 || y0 != y1) {
+				map_.walling[y1][x1] = map_.walling[y0][x0];
+				map_.walling[y0][x0] = 0;
+			}
+		}*/
+	}
 	map_.walling[(int)players_[playerID].where.y][(int)players_[playerID].where.x] = 0;
 
 	Line aux;
@@ -188,6 +211,7 @@ void LittleWolf::update_player_info(int playerID, float ax, float ay, float bx, 
 
 	players_[playerID] = player;
 	map_.walling[(int)players_[playerID].where.y][(int)players_[playerID].where.x] = player_to_tile(playerID);
+	
 }
 
 void LittleWolf::load(std::string filename) {
