@@ -81,6 +81,6 @@ struct ShootMsg: MsgWithId {
 	float why;		//pos y
 	float theta;   // rotation (in rad)
 
-	_IMPL_SERIALIAZION_WITH_BASE_(MsgWithId, x,y,vx,vy,w,h,rot)
+	_IMPL_SERIALIAZION_WITH_BASE_(MsgWithId, ax,ay,bx,by,whx,why,theta)
 
 };

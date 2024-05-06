@@ -114,7 +114,7 @@ void LittleWolf::checkForCollision(Uint8 clientId_, LittleWolf::Line fov, Little
 		if (hit.tile > 9 && mag(sub(where, hit.where)) < shoot_distace) {
 			uint8_t id = tile_to_player(hit.tile);
 
-			Game::instance()->get_networking().send_dead(clientId_);
+			Game::instance()->get_networking().send_dead(id);
 		}
 	}
 }
