@@ -29,7 +29,7 @@ public:
 	//void send_state(LittleWolf::Line& fov, LittleWolf::Point& where, float theta);
 	void send_my_info(const Vector2D& a, const Vector2D& b, const Vector2D& pos, const Vector2D& vel, float s, float acc, float rot, Uint8 state);
 	
-	void send_shoot(Vector2D p, Vector2D v, int width, int height, float r);
+	void send_shoot(Uint8, LittleWolf::Line, LittleWolf::Point, float);
 	void send_dead(Uint8 id);
 	void send_restart();
 

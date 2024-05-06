@@ -73,13 +73,13 @@ struct PlayerInfoMsg: MsgWithId {
 };
 struct ShootMsg: MsgWithId {
 
-	float x;
-	float y;
-	float vx;
-	float vy;
-	int w;
-	int h;
-	float rot;
+	float ax;       //point a x 
+	float ay;       //point a y
+	float bx;       // point b x
+	float by;       //point b y
+	float whx;		//pos x
+	float why;		//pos y
+	float theta;   // rotation (in rad)
 
 	_IMPL_SERIALIAZION_WITH_BASE_(MsgWithId, x,y,vx,vy,w,h,rot)
 

@@ -144,6 +144,10 @@ public:
 	void send_my_info();
 
 	//void send_my_state();
+	//checks for collisions
+	void checkForCollision(Uint8 clientId_, LittleWolf::Line fov, LittleWolf::Point where, float theta);
+	//plays shoot sound effect
+	void playShoot(Uint8 clientId_);
 
 	//void update_player_state(Uint8 id, float ax, float ay, float bx, float by, float whx, float why, float theta);
 
@@ -161,7 +165,7 @@ private:
 			bool ignore_players, bool ignore_deads);
 
 	// Moves the player when w,a,s,d are held down. Handles collision detection for the walls.
-	bool shoot(Player &p);
+	void shoot(Player &p);
 
 	// Spins the player when keys grid_h,l are held down. When left-shit is held down the move is slower
 	inline void spin(Player &p);

@@ -125,7 +125,7 @@ void Networking::update() {
 			handle_player_info(m5);
 			break;
 
-		/*case _SHOOT:
+		case _SHOOT:
 			m3.deserialize(p_->data);
 			handle_shoot(m3);
 			break;
@@ -135,6 +135,7 @@ void Networking::update() {
 			handle_dead(m4);
 			break;
 
+		/*
 		case _RESTART:
 			handle_restart();
 			break;
@@ -175,25 +176,42 @@ void Networking::handle_disconnet(Uint8 id) {
 	}
 }*/
 
-void Networking::send_shoot(Vector2D p, Vector2D v, int width, int height,
-		float r) {
+void Networking::send_shoot(Uint8 clientId_, LittleWolf::Line fov, LittleWolf::Point where, float theta) {
+
+
 	ShootMsg m;
 	m._type = _SHOOT;
 	m._client_id = clientId_;
-	m.x = p.getX();
-	m.y = p.getY();
-	m.vx = v.getX();
-	m.vy = v.getY();
-	m.w = width;
-	m.h = height;
-	m.rot = r;
+	m.ax = fov.a.x;
+	m.ay = fov.a.y;
+	m.bx = fov.b.x;
+	m.by = fov.b.y;
+	m.whx = where.x;
+	m.why = where.y;
+	m.theta = theta;
 	SDLNetUtils::serializedSend(m, p_, sock_, srvadd_);
 }
 
 void Networking::handle_shoot(const ShootMsg &m) {
-	/*Game::instance()->get_bullets().shoot(Vector2D(m.x, m.y),
-			Vector2D(m.vx, m.vy), m.w, m.h, m.rot);*/
+	//se reproduce el sonido (a la distancia adecuada)
+	Game::instance()->get_littlewolf().playShoot(m._client_id);
 
+	//y solo si es master hace colisiones
+	if (is_master())
+	{
+		Uint8 id = m._client_id;
+		float theta = m.theta;
+		LittleWolf::Line fov;
+		fov.a.x = m.ax;
+		fov.a.y = m.ay;
+		fov.b.x = m.bx;
+		fov.b.y = m.by;
+		LittleWolf::Point where;
+		where.x = m.whx;
+		where.y = m.why;
+
+		Game::instance()->get_littlewolf().checkForCollision(id, fov, where, theta);
+	}
 }
 
 void Networking::send_dead(Uint8 id) {
